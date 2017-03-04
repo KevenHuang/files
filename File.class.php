@@ -181,7 +181,7 @@ class File{
         $newName .= implode(array_slice($chars,0,6),'');
         $newName .= time();
         $newName .= '.'.$ext;
-        return $newName;
+        return md5($newName);
     }
 
     /**
