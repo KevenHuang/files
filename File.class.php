@@ -180,8 +180,9 @@ class File{
         shuffle($chars);
         $newName .= implode(array_slice($chars,0,6),'');
         $newName .= time();
+        $newName = md5($newName);
         $newName .= '.'.$ext;
-        return md5($newName);
+        return $newName;
     }
 
     /**
