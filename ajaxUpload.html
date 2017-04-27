@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+	<head>
+		<title>异步文件上传</title>
+		<meta charset='utf-8'/>
+		<script type="text/javascript" src="./jquery.min.js"></script>
+	</head>
+	<body>
+		<form enctype="multipart/form-data" name="myForm">
+			<input type="file" name="file1" id="file"/><br/>
+			<input type="button" value="上传" name="submit" id="submit"/>
+		</form>
+		<progress value="0"></progress>
+	</body>
+</html>
+<script type="text/javascript">
+$(function(){
+	$("#submit").click(function(){
+		var formData = new FormData();
+		var file = document.myForm.file1.files[0];
+		formData.append('file',file);
+		var url = './uploadHandler.php';
+		$.ajax({
+			type:'POST',
+			dataType:'json',
+			url:url,
+			xhr:function(){
+				myXhr = $.ajaxSettings.xhr();
+				if(myXhr.upload){
+					myXhr.upload.addEventListener('progress',function(e){
+						if(e.lengthComputable){
+							console.log(e.loaded);
+							$('progress').attr({value:e.loaded,max:e.total});
+						}
+					},false);
+				}
+				return myXhr;
+			},
+			data:formData,
+			success:function(res){
+				//alert(res.message);
+			},
+			cache:false,
+			contentType:false,
+			processData:false
+		});
+	});
+});
+</script>
