@@ -23,7 +23,7 @@
  *方法20：删除文件 removeFile
  *方法21：获取错误信息 getError
  *方法22：压缩文件夹 zipFolder
- *方法23：加压文件夹 extractFolder
+ *方法23：解压文件夹 extractFolder
  */
 
 class File{
@@ -753,14 +753,16 @@ class File{
         $filename = pathinfo($path)['filename'];
         $res = $zip->open($to.'/'.$filename.'.zip',ZipArchive::CREATE);
         $dirs = $this->showDiretories($path);
-        if($res){
-            //key是目录名，val是文件名
-            foreach($dirs as $key=>$val){
-                if($val){
-                    foreach($val as $v){
-                        if(is_file($key.'/'.$v)){
-                            $zip->addFile($key.'/'.$v);
-                        }
+        if(!$res){
+            $this->error = '压缩文件夹失败';
+            return false;
+        }
+        //key是目录名，val是文件名
+        foreach($dirs as $key=>$val){
+            if($val){
+                foreach($val as $v){
+                    if(is_file($key.'/'.$v)){
+                        $zip->addFile($key.'/'.$v);
                     }
                 }
             }
@@ -788,11 +790,13 @@ class File{
         $filename = pathinfo($path)['filename'];
         $zip = new ZipArchive();
         $res = $zip->open($path);
-        if($res){
-            if(!$zip->extractTo($to.'/'.$filename)){
-                $this->error = '解压失败';
-                return false;
-            }
+        if(!$res){
+            $this->error = '压缩包打开失败';
+            return false;
+        }
+        if(!$zip->extractTo($to.'/'.$filename)){
+            $this->error = '解压失败';
+            return false;
         }
         $zip->close();
         return true;
