@@ -1,28 +1,29 @@
 <?php
 /**
  *开源项目：所有关于文件目录操作的功能
- *操作1：单文件上传功能 upload
- *操作2：多文件上传功能 mulUpload
- *操作3：文件下载 downLoad
- *操作4：查看单级目录结构 showDirectory
- *操作5：递归查看目录结构 showDirectories
- *操作6：查看文件或文件夹的大小 dirSize
- *操作7：按关键字递归查找文件 findFilesByKeyword
- *操作8：递归删除非空目录 deleteDir
- *操作9：递归删除空目录 deleteEmptyDir
- *操作10：递归创建目录 makeDir
- *操作11：剪切/复制目录到目录 moveDirToDestination
- *操作12：剪切文件到目录 moveFileToDir
- *操作13：显示文件或目录的详细信息 showFileInfo
- *操作14：创建文件并写入内容 createFile
- *操作15：向文件写入内容 insertContentToFile
- *操作16：文件重命名 renameFile
- *操作17：删除文件 removeFile
+ *方法1：单文件上传功能 upload
+ *方法2：多文件上传功能 mulUpload
+ *方法3：文件下载 downLoad
+ *方法4：查看单级目录结构 showDirectory
+ *方法5：递归查看目录结构 showDirectories
+ *方法6：查看文件或文件夹的大小 dirSize
+ *方法7：按关键字递归查找文件 findFilesByKeyword
+ *方法8：递归删除非空目录 deleteDir
+ *方法9：递归删除空目录 deleteEmptyDir
+ *方法10：递归创建目录 makeDir
+ *方法11：剪切/复制目录到目录 moveDirToDestination
+ *方法12：剪切文件到目录 moveFileToDir
+ *方法13：显示文件或目录的详细信息 showFileInfo
+ *方法14：创建文件并写入内容 createFile
+ *方法15：向文件写入内容 insertContentToFile
+ *方法16：文件重命名 renameFile
+ *方法17：删除文件 removeFile
+ *方法18：获取错误信息 getError
  */
 
 class File{
     //上一次操作的错误提示
-    public $error;
+    private $error;
 
     /**
      *单文件上传
@@ -159,10 +160,18 @@ class File{
      */
     public function downLoad($filePath){
         $filePath = str_replace('\\','/',$filePath);
+        //判断要下载的文件是否存在
+        if(!file_exists($filePath)){
+            $this->error = '文件不存在';
+        }
+        //判断要下载的是否是一个文件
+        if(!is_file($filePath)){
+            $this->error = $filePath.'不是一个文件';
+        }
         $basename = basename($filePath);
         header("Content-Type:application/octet-stream");
         header("Content-Disposition:attachment;filename=".$basename);
-        $this->error = file_get_contents($filePath);
+        file_get_contents($filePath);
     }
 
     /**
@@ -695,6 +704,13 @@ class File{
             return false;
         }
         return true;
+    }
+    /**
+     *获取错误信息
+     *@return $error string 详细的错误信息
+     */
+    public function getError(){
+        return $this->error;
     }
 }
 //header('content-type:text/html;charset=utf-8');
