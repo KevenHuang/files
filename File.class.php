@@ -23,7 +23,7 @@
  *方法20：删除文件 removeFile
  *方法21：获取错误信息 getError
  *方法22：压缩文件夹 zipFolder
- *方法23：解压文件夹 extractFolder
+ *方法23：加压文件夹 extractFolder
  */
 
 class File{
@@ -160,7 +160,7 @@ class File{
         }
         foreach($filename as $val){
             if(!$fileNameArr[] = $this->upload($val,$allow,$size,$path)){
-                //遇到上传文件出错，删除部分上传的文件
+                //遇到上传文件出错，删除部分已上传的文件
                 foreach($fileNameArr as $val){
                     if($val!==false){
                         $this->removeFile($path.'/'.$val);
@@ -181,10 +181,12 @@ class File{
         //判断要下载的文件是否存在
         if(!file_exists($filePath)){
             $this->error = '文件不存在';
+            return false;
         }
         //判断要下载的是否是一个文件
         if(!is_file($filePath)){
             $this->error = $filePath.'不是一个文件';
+            return false;
         }
         $basename = basename($filePath);
         header("Content-Type:application/octet-stream");
@@ -735,11 +737,21 @@ class File{
     /**
      *压缩文件夹
      *@param $path string 文件路径
+     *@param [$to='./'] string 把压缩后的文件夹放到指定目录中
      */
-    public function zipFolder($path){
+    public function zipFolder($path,$to='./'){
+        //判断文件夹是否存在
+        if(!file_exists($path)){
+            $this->error = $path.'不存在';
+            return false;
+        }
+        if(!file_exists($to)){
+            $this->error = $to.'不存在';
+            return false;
+        }
         $zip = new ZipArchive();
         $filename = pathinfo($path)['filename'];
-        $res = $zip->open($filename.'.zip',ZipArchive::CREATE);
+        $res = $zip->open($to.'/'.$filename.'.zip',ZipArchive::CREATE);
         $dirs = $this->showDiretories($path);
         if($res){
             //key是目录名，val是文件名
@@ -766,10 +778,12 @@ class File{
         //判断指定目录是否存在
         if(!file_exists($to)){
             $this->error = $to.'不存在';
+            return false;
         }
         //判断解压包是否存在
         if(!file_exists($path)){
             $this->error = $path.'不存在';
+            return false;
         }
         $filename = pathinfo($path)['filename'];
         $zip = new ZipArchive();
@@ -777,6 +791,7 @@ class File{
         if($res){
             if(!$zip->extractTo($to.'/'.$filename)){
                 $this->error = '解压失败';
+                return false;
             }
         }
         $zip->close();
