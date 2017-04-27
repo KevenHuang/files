@@ -22,6 +22,7 @@
  *方法19：检测文件名是否合法 checkFileName
  *方法20：删除文件 removeFile
  *方法21：获取错误信息 getError
+ *方法22：压缩文件夹 zipFolder
  */
 
 class File{
@@ -29,29 +30,33 @@ class File{
     private $error;
 
     /**
-     *1单文件上传
+     *单文件上传
      *@param $file array 要上传的文件数组信息
      *@param $allow array 允许上传的文件类型
-     *@param $size int 允许上传文件的大小
+     *@param [$size=0] int 允许上传文件的大小，默认为0，不限制文件大小
      *@param $path string 上传文件保存的路径
      *@return $fileName string 文件上传成功后的新文件名
      */
-    public function upload($file,$allow,$size,$path='./upload'){
+    public function upload($file,$allow,$size=0,$path='./upload'){
         $path = str_replace('\\','/',$path);
         //判断上传文件是否是一个合理的文件
         if(!is_array($file)){
             $this->error = '上传文件不是一个合理的文件';
             return false;
         }
+        //检测文件的真实MIME类型，防止文件已假冒的MIME类型上传
+        $file['type'] = mime_content_type($file['tmp_name']);
         //判断上传文件是否是允许上传文件的类型
         if(!in_array($file['type'],$allow)){
             $this->error = '不允许上传的文件类型';
             return false;
         }
         //判断上传文件的大小是否符合允许上传文件的大小
-        if($file['size']>$size){
-            $this->error = '上传文件大小超过允许上传文件大小';
-            return false;
+        if($size!=0){
+            if($file['size']>$size){
+                $this->error = '上传文件大小超过允许上传文件大小';
+                return false;
+            }
         }
         //判断文件是否是通过HTTP POST上传的
         if(!is_uploaded_file($file['tmp_name'])){
@@ -102,15 +107,15 @@ class File{
     }
 
     /**
-     *2多文件上传
+     *多文件上传
      *@param $fileArr array 文件数组
      *@param $allow array 允许上传的文件类型
-     *@param $size int 允许上传单个文件的大小
-     *@param $type int 多文件上传类型，1表示文件域的name为数组file[]形式(默认)，2表示普通类型
+     *@param [$size=0] int 允许上传文件的大小，默认为0，不限制文件大小
+     *@param [$type=1] int 多文件上传类型，1表示文件域的name为数组file[]形式(默认)，2表示普通类型
      *@param [$path='./upload'] string 上传文件的保存位置
      *@return $fileNameArr array 新的文件名数组
      */
-    public function multiUpload($fileArr,$allow,$size,$type=1,$path='./upload'){
+    public function multiUpload($fileArr,$allow,$size=0,$type=1,$path='./upload'){
         $filename = array();
         if($type==1){
             foreach($fileArr as $key=>$val){
@@ -154,7 +159,7 @@ class File{
         }
         foreach($filename as $val){
             if(!$fileNameArr[] = $this->upload($val,$allow,$size,$path)){
-                $this->error = '文件上传出错了';
+                //遇到上传文件出错，删除部分上传的文件
                 foreach($fileNameArr as $val){
                     if($val!==false){
                         $this->removeFile($path.'/'.$val);
@@ -167,7 +172,7 @@ class File{
     }
 
     /**
-     *3文件下载
+     *文件下载
      *@param $filePath string 要下载的文件的路径
      */
     public function downLoad($filePath){
@@ -187,7 +192,7 @@ class File{
     }
 
     /**
-     *4生成新的文件名
+     *生成新的文件名
      *@param $oldName string 旧的文件名
      *@return $newName string 新的文件名
      */
@@ -207,7 +212,7 @@ class File{
     }
 
     /**
-     *5查看单级目录结构
+     *查看单级目录结构
      *@param $path string 要查看的目录路径
      *@param $arr array 目录结构
      */
@@ -237,7 +242,7 @@ class File{
     }
 
     /**
-     *6递归查看目录结构
+     *递归查看目录结构
      *@param $path string 目录路径
      *@return $arr array 目录结构
      */
@@ -276,7 +281,7 @@ class File{
     }
 
     /**
-     *7查看文件或文件夹的大小
+     *查看文件或文件夹的大小
      *@param $path string 要查看大小的文件或目录路径
      *@return $size float 文件或目录的大小
      */
@@ -309,7 +314,7 @@ class File{
     }
 
     /**
-     *8返回带有单位的文件大小
+     *返回带有单位的文件大小
      *@param $size int 原始的文件大小
      *@return $hsize float 带有单位的文件大小
      */
@@ -326,7 +331,7 @@ class File{
     }
 
     /**
-     *9按关键字递归查找文件
+     *按关键字递归查找文件
      *@param $path string 要查找文件的目录
      *@param $keyword string 要查找的关键字
      *@return $files array 查找到的文件数组
@@ -361,7 +366,7 @@ class File{
     }
 
     /**
-     *10递归删除非空目录
+     *递归删除非空目录
      *@param $path string 要删除的目录
      */
     public function deleteDir($path){
@@ -401,7 +406,7 @@ class File{
     }
 
     /**
-     *11递归删除空目录
+     *递归删除空目录
      *@param $path string 要删除的目录路径
      */
     public function deleteEmptyDir($path){
@@ -440,7 +445,7 @@ class File{
     }
 
     /**
-     *12递归创建目录
+     *递归创建目录
      *@param $path string 在此目录下创建目录
      *@param $destination string 创建的目标目录
      */
@@ -475,7 +480,7 @@ class File{
     }
 
     /**
-     *13剪切/复制目录到目录
+     *剪切/复制目录到目录
      *@param $source string 源目录路径
      *@param $destination string 目标目录路径
      *@param [$option='x'] string 参数'x'为剪切,'v'为复制
@@ -533,7 +538,7 @@ class File{
     }
 
     /**
-     *14剪切/复制文件到目录
+     *剪切/复制文件到目录
      *@param $source string 源文件路径
      *@param $destination string 目标目录路径
      *@param [$option='x'] string 参数'x'为剪切,'v'为复制
@@ -570,7 +575,7 @@ class File{
     }
 
     /**
-     *15显示文件或目录的详细信息
+     *显示文件或目录的详细信息
      *@param $path string 文件或目录的路径
      *@return $info array 文件或目录的详细信息
      */
@@ -598,7 +603,7 @@ class File{
     }
 
     /**
-     *16创建文件并写入内容
+     *创建文件并写入内容
      *@param $filename string 文件名
      *@param [$path='./'] string 在此目录下创建文件
      *@param [$content=''] string 要写入的内容
@@ -630,7 +635,7 @@ class File{
     }
 
     /**
-     *17向文件写入内容
+     *向文件写入内容
      *@param $file string 文件路径
      *@param $content string 写入文件的内容
      *@param [$option=0] int 附件参数(0覆盖写入,1追加写入)
@@ -656,7 +661,7 @@ class File{
     }
 
     /**
-     *18文件重命名
+     *文件重命名
      *@param $oldname string 旧的文件名
      *@param $newname string 新的文件名
      */
@@ -682,7 +687,7 @@ class File{
     }
 
     /**
-     *19检测文件名是否合法
+     *检测文件名是否合法
      *@param $filename string 文件名
      */
     public function checkFileName($filename){
@@ -697,7 +702,7 @@ class File{
     }
 
     /**
-     *20删除文件
+     *删除文件
      *@param $filename 文件名
      */
     public function removeFile($filename){
@@ -717,11 +722,20 @@ class File{
         }
         return true;
     }
+
     /**
-     *21获取错误信息
+     *获取错误信息
      *@return $error string 详细的错误信息
      */
     public function getError(){
         return $this->error;
+    }
+
+    /**
+     *压缩文件夹
+     *@param $path string 文件路径
+     */
+    public function zipFolder(){
+
     }
 }
