@@ -23,7 +23,7 @@
  *方法20：删除文件 removeFile
  *方法21：获取错误信息 getError
  *方法22：压缩文件夹 zipFolder
- *方法23：加压文件夹 extractFolder
+ *方法23：解压文件夹 extractFolder
  */
 
 class File{
