@@ -201,7 +201,7 @@ class File{
         //获取文件的后缀名
         $ext = pathinfo($oldName)['extension'];
         //生成六位随机数
-        $chars = array_merge(range('a','z'),range('A','Z'));
+        $chars = array_merge(range('a','z'),range('A','Z'),range(0,9));
         //打乱数组的顺序
         shuffle($chars);
         $newName .= implode(array_slice($chars,0,6),'');
@@ -264,7 +264,7 @@ class File{
                     continue;
                 }
                 if(is_dir($subPath)){
-                    $this->showDiretorys($subPath);
+                    $this->showDiretories($subPath);
                 }else{
                     $flag = false;
                     $arr[dirname($subPath)][] = $file;
@@ -301,14 +301,14 @@ class File{
                     continue;
                 }
                 if(is_dir($subPath)){
-                    $this->getSize($subPath);
+                    $this->dirSize($subPath);
                 }else{
                     $size += filesize($subPath);
                 }
             }
             closedir($handle);
         }else{
-            return filesize($path);
+            return $this->getSize(filesize($path));
         }
         return $this->getSize($size);
     }
@@ -735,7 +735,30 @@ class File{
      *压缩文件夹
      *@param $path string 文件路径
      */
-    public function zipFolder(){
-
+    public function zipFolder($path){
+        $zip = new ZipArchive();
+        $dirname = dirname($path);
+        if(is_file($path)){
+            $filename = pathinfo($path)['filename'];
+        }
+        if(is_dir($path)){
+            $filename = pathinfo($path)['filename'];
+        }
+        $res = $zip->open($filename.'.zip',ZipArchive::CREATE);
+        $dirs = $this->showDiretories($path);
+        if($res){
+            //key是目录名，val是文件名
+            foreach($dirs as $key=>$val){
+                if($val){
+                    foreach($val as $v){
+                        if(is_file($key.'/'.$v)){
+                            $zip->addFile($key.'/'.$v);
+                        }
+                    }
+                }
+            }
+        }
+        $zip->close();
+        return true;
     }
 }
