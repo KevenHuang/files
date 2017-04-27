@@ -23,6 +23,7 @@
  *方法20：删除文件 removeFile
  *方法21：获取错误信息 getError
  *方法22：压缩文件夹 zipFolder
+ *方法23：加压文件夹 extractFolder
  */
 
 class File{
@@ -737,13 +738,7 @@ class File{
      */
     public function zipFolder($path){
         $zip = new ZipArchive();
-        $dirname = dirname($path);
-        if(is_file($path)){
-            $filename = pathinfo($path)['filename'];
-        }
-        if(is_dir($path)){
-            $filename = pathinfo($path)['filename'];
-        }
+        $filename = pathinfo($path)['filename'];
         $res = $zip->open($filename.'.zip',ZipArchive::CREATE);
         $dirs = $this->showDiretories($path);
         if($res){
@@ -756,6 +751,32 @@ class File{
                         }
                     }
                 }
+            }
+        }
+        $zip->close();
+        return true;
+    }
+
+    /**
+     *解压文件夹
+     *@param $path string 要解压的文件路径
+     *@param $to string 解压到指定的目录
+     */
+    public function extractFolder($path,$to){
+        //判断指定目录是否存在
+        if(!file_exists($to)){
+            $this->error = $to.'不存在';
+        }
+        //判断解压包是否存在
+        if(!file_exists($path)){
+            $this->error = $path.'不存在';
+        }
+        $filename = pathinfo($path)['filename'];
+        $zip = new ZipArchive();
+        $res = $zip->open($path);
+        if($res){
+            if(!$zip->extractTo($to.'/'.$filename)){
+                $this->error = '解压失败';
             }
         }
         $zip->close();
