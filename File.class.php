@@ -2,23 +2,26 @@
 /**
  *开源项目：所有关于文件目录操作的功能
  *方法1：单文件上传功能 upload
- *方法2：多文件上传功能 mulUpload
+ *方法2：多文件上传功能 multiUpload
  *方法3：文件下载 downLoad
- *方法4：查看单级目录结构 showDirectory
- *方法5：递归查看目录结构 showDirectories
- *方法6：查看文件或文件夹的大小 dirSize
- *方法7：按关键字递归查找文件 findFilesByKeyword
- *方法8：递归删除非空目录 deleteDir
- *方法9：递归删除空目录 deleteEmptyDir
- *方法10：递归创建目录 makeDir
- *方法11：剪切/复制目录到目录 moveDirToDestination
- *方法12：剪切文件到目录 moveFileToDir
- *方法13：显示文件或目录的详细信息 showFileInfo
- *方法14：创建文件并写入内容 createFile
- *方法15：向文件写入内容 insertContentToFile
- *方法16：文件重命名 renameFile
- *方法17：删除文件 removeFile
- *方法18：获取错误信息 getError
+ *方法4：生成新的文件名 getNewFileName
+ *方法5：查看单级目录结构 showDirectory
+ *方法6：递归查看目录结构 showDirectories
+ *方法7：查看文件或文件夹的大小 dirSize
+ *方法8：返回带有单位的文件大小 getSize
+ *方法9：按关键字递归查找文件 findFilesByKeyword
+ *方法10：递归删除非空目录 deleteDir
+ *方法11：递归删除空目录 deleteEmptyDir
+ *方法12：递归创建目录 makeDir
+ *方法13：剪切/复制目录到目录 moveDirToDestination
+ *方法14：剪切文件到目录 moveFileToDir
+ *方法15：显示文件或目录的详细信息 showFileInfo
+ *方法16：创建文件并写入内容 createFile
+ *方法17：向文件写入内容 insertContentToFile
+ *方法18：文件重命名 renameFile
+ *方法19：检测文件名是否合法 checkFileName
+ *方法20：删除文件 removeFile
+ *方法21：获取错误信息 getError
  */
 
 class File{
@@ -26,7 +29,7 @@ class File{
     private $error;
 
     /**
-     *单文件上传
+     *1单文件上传
      *@param $file array 要上传的文件数组信息
      *@param $allow array 允许上传的文件类型
      *@param $size int 允许上传文件的大小
@@ -99,39 +102,48 @@ class File{
     }
 
     /**
-     *多文件上传
+     *2多文件上传
      *@param $fileArr array 文件数组
      *@param $allow array 允许上传的文件类型
      *@param $size int 允许上传单个文件的大小
+     *@param $type int 多文件上传类型，1表示文件域的name为数组file[]形式(默认)，2表示普通类型
      *@param [$path='./upload'] string 上传文件的保存位置
-     *@param $fileNameArr array 新的文件名数组
+     *@return $fileNameArr array 新的文件名数组
      */
-    public function mulUpload($fileArr,$allow,$size,$path='./upload'){
+    public function multiUpload($fileArr,$allow,$size,$type=1,$path='./upload'){
         $filename = array();
-        foreach($fileArr as $key=>$val){
-            foreach($val as $k=>$v){
-                if($key=='name'){
-                    if($v!==''){
-                         $filename[$k]['name'] = $v;
+        if($type==1){
+            foreach($fileArr as $key=>$val){
+                foreach($val as $k=>$v){
+                    if($key=='name'){
+                        if($v!==''){
+                             $filename[$k]['name'] = $v;
+                        }
+                    }elseif($key=='type'){
+                        if($v!==''){
+                            $filename[$k]['type'] = $v;
+                        }
+                    }elseif($key=='tmp_name'){
+                        if($v!==''){
+                            $filename[$k]['tmp_name'] = $v;
+                        }
+                    }elseif($key=='error'){
+                        if($v!==4){
+                            $filename[$k]['error'] = $v;
+                        }
+                    }else{
+                        if($v!==0){
+                            $filename[$k]['size'] = $v;
+                        }
                     }
-                }elseif($key=='type'){
-                    if($v!==''){
-                        $filename[$k]['type'] = $v;
-                    }
-                }elseif($key=='tmp_name'){
-                    if($v!==''){
-                        $filename[$k]['tmp_name'] = $v;
-                    }
-                }elseif($key=='error'){
-                    if($v!==4){
-                        $filename[$k]['error'] = $v;
-                    }
-                }else{
-                    if($v!==0){
-                        $filename[$k]['size'] = $v;
-                    }
-                }
 
+                }
+            }    
+        }elseif($type==2){
+            foreach($fileArr as $val){
+                if($val['name']!=''||$val['type']!=''||$val['tmp_name']!=''||$val['error']==0||$val['size']!=0){
+                    $filename[] = $val;
+                }
             }
         }
         $fileNameArr = array();
@@ -155,7 +167,7 @@ class File{
     }
 
     /**
-     *文件下载
+     *3文件下载
      *@param $filePath string 要下载的文件的路径
      */
     public function downLoad($filePath){
@@ -175,7 +187,7 @@ class File{
     }
 
     /**
-     *生成新的文件名
+     *4生成新的文件名
      *@param $oldName string 旧的文件名
      *@return $newName string 新的文件名
      */
@@ -195,7 +207,7 @@ class File{
     }
 
     /**
-     *查看单级目录结构
+     *5查看单级目录结构
      *@param $path string 要查看的目录路径
      *@param $arr array 目录结构
      */
@@ -225,7 +237,7 @@ class File{
     }
 
     /**
-     *递归查看目录结构
+     *6递归查看目录结构
      *@param $path string 目录路径
      *@return $arr array 目录结构
      */
@@ -264,7 +276,7 @@ class File{
     }
 
     /**
-     *查看文件或文件夹的大小
+     *7查看文件或文件夹的大小
      *@param $path string 要查看大小的文件或目录路径
      *@return $size float 文件或目录的大小
      */
@@ -297,7 +309,7 @@ class File{
     }
 
     /**
-     *返回带有单位的文件大小
+     *8返回带有单位的文件大小
      *@param $size int 原始的文件大小
      *@return $hsize float 带有单位的文件大小
      */
@@ -314,7 +326,7 @@ class File{
     }
 
     /**
-     *按关键字递归查找文件
+     *9按关键字递归查找文件
      *@param $path string 要查找文件的目录
      *@param $keyword string 要查找的关键字
      *@return $files array 查找到的文件数组
@@ -349,7 +361,7 @@ class File{
     }
 
     /**
-     *递归删除非空目录
+     *10递归删除非空目录
      *@param $path string 要删除的目录
      */
     public function deleteDir($path){
@@ -389,7 +401,7 @@ class File{
     }
 
     /**
-     *递归删除空目录
+     *11递归删除空目录
      *@param $path string 要删除的目录路径
      */
     public function deleteEmptyDir($path){
@@ -428,7 +440,7 @@ class File{
     }
 
     /**
-     *递归创建目录
+     *12递归创建目录
      *@param $path string 在此目录下创建目录
      *@param $destination string 创建的目标目录
      */
@@ -463,7 +475,7 @@ class File{
     }
 
     /**
-     *剪切/复制目录到目录
+     *13剪切/复制目录到目录
      *@param $source string 源目录路径
      *@param $destination string 目标目录路径
      *@param [$option='x'] string 参数'x'为剪切,'v'为复制
@@ -521,7 +533,7 @@ class File{
     }
 
     /**
-     *剪切/复制文件到目录
+     *14剪切/复制文件到目录
      *@param $source string 源文件路径
      *@param $destination string 目标目录路径
      *@param [$option='x'] string 参数'x'为剪切,'v'为复制
@@ -558,7 +570,7 @@ class File{
     }
 
     /**
-     *显示文件或目录的详细信息
+     *15显示文件或目录的详细信息
      *@param $path string 文件或目录的路径
      *@return $info array 文件或目录的详细信息
      */
@@ -586,7 +598,7 @@ class File{
     }
 
     /**
-     *创建文件并写入内容
+     *16创建文件并写入内容
      *@param $filename string 文件名
      *@param [$path='./'] string 在此目录下创建文件
      *@param [$content=''] string 要写入的内容
@@ -618,7 +630,7 @@ class File{
     }
 
     /**
-     *向文件写入内容
+     *17向文件写入内容
      *@param $file string 文件路径
      *@param $content string 写入文件的内容
      *@param [$option=0] int 附件参数(0覆盖写入,1追加写入)
@@ -644,7 +656,7 @@ class File{
     }
 
     /**
-     *文件重命名
+     *18文件重命名
      *@param $oldname string 旧的文件名
      *@param $newname string 新的文件名
      */
@@ -670,7 +682,7 @@ class File{
     }
 
     /**
-     *检测文件名是否合法
+     *19检测文件名是否合法
      *@param $filename string 文件名
      */
     public function checkFileName($filename){
@@ -685,7 +697,7 @@ class File{
     }
 
     /**
-     *删除文件
+     *20删除文件
      *@param $filename 文件名
      */
     public function removeFile($filename){
@@ -706,13 +718,10 @@ class File{
         return true;
     }
     /**
-     *获取错误信息
+     *21获取错误信息
      *@return $error string 详细的错误信息
      */
     public function getError(){
         return $this->error;
     }
 }
-//header('content-type:text/html;charset=utf-8');
-//$obj = new File();
-//var_dump($obj->removeFile('images_on.bmp'));
