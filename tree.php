@@ -19,18 +19,22 @@ array('id'=>15,'name'=>'家具','pid'=>0),
 array('id'=>16,'name'=>'电视盒子','pid'=>4),
 array('id'=>17,'name'=>'桌子','pid'=>15),
 array('id'=>18,'name'=>'酷派手机','pid'=>1),
-array('id'=>19,'name'=>'小米电视','pid'=>6)
+array('id'=>19,'name'=>'小米电视','pid'=>6),
+array('id'=>20,'name'=>'椅子','pid'=>15),
+array('id'=>21,'name'=>'电脑椅子','pid'=>20),
+array('id'=>22,'name'=>'便宜电脑椅子','pid'=>21)
 );
 
-function tree($data,$pid=0,$level=1){
+function tree($data,$pid=0,$level=0){
 	static $tree = [];
 	foreach($data as $key=>$val){
 		if($val['pid']==$pid){
 			$val['level'] = $level;
-			$parentId = $val['id'];	
+			$parentId = $val['id'];
 			$tree[] = $val;
 			unset($data[$key]);
-			tree($data,$parentId);
+			tree($data,$parentId,++$level);
+			$level--;
 		}
 	}
 	return $tree;
